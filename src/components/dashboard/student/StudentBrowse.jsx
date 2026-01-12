@@ -3,15 +3,31 @@ import React from 'react';
 import { GlassCard } from '../../ui/GlassCard';
 import { Button } from '../../ui/Button';
 import { useCourses } from '../../../context/CourseContext';
+import { useEnrollments } from '../../../context/EnrollmentContext';
 import { ShoppingCart, Star, BookOpen } from 'lucide-react';
 
 const StudentBrowse = ({ user }) => {
-    const { courses, enrollStudent } = useCourses();
-    const availableCourses = courses.filter(c => !c.students.includes(user.id || 3) && c.status === 'Active');
+    const { courses } = useCourses();
+    const { myEnrollments, enrollCourse } = useEnrollments();
 
-    const handleEnroll = (courseId) => {
-        enrollStudent(courseId, user.id || 3);
-        // Assuming parent component or context handles feedback, or we could add a toast here
+    // Filter out courses heavily already enrolled in
+    const availableCourses = courses.filter(c =>
+        !myEnrollments.some(enr => enr.course._id === c._id && enr.status === 'active') &&
+        c.status === 'active'
+    );
+
+    const handleEnroll = async (courseId) => {
+        const result = await enrollCourse(courseId);
+        if (result.success) {
+            alert("Enrolled successfully!");
+        } else {
+            alert("Enrollment failed: " + result.message);
+        }
+    };
+
+    const getImageUrl = (path) => {
+        if (!path) return null;
+        return path.startsWith('http') ? path : `http://localhost:5000${path}`;
     };
 
     return (
@@ -25,10 +41,10 @@ const StudentBrowse = ({ user }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {availableCourses.map(course => (
-                    <GlassCard key={course.id} className="flex flex-col h-full group hover:translate-y-[-4px] transition-all duration-300">
+                    <GlassCard key={course._id} className="flex flex-col h-full group hover:translate-y-[-4px] transition-all duration-300">
                         <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-gray-800">
                             {course.thumbnail ? (
-                                <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                                <img src={getImageUrl(course.thumbnail)} alt={course.title} className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 text-gray-600">
                                     <BookOpen className="w-10 h-10 opacity-20" />
@@ -46,7 +62,7 @@ const StudentBrowse = ({ user }) => {
 
                         <div className="flex items-center justify-between pt-4 border-t border-white/5">
                             <span className="text-xl font-bold text-white">${course.price}</span>
-                            <Button onClick={() => handleEnroll(course.id)} variant="gradient" className="text-sm py-2 px-6 shadow-neon">
+                            <Button onClick={() => handleEnroll(course._id)} variant="gradient" className="text-sm py-2 px-6 shadow-neon">
                                 Enroll Now
                             </Button>
                         </div>

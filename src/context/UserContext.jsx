@@ -15,7 +15,7 @@ export const UserProvider = ({ children }) => {
         if (!authUser) return;
         try {
             setLoading(true);
-            const { data } = await api.get(`/users/${authUser._id}`); // Using ID for now as we don't have a /profile/me yet
+            const { data } = await api.get('/users/profile');
             setCurrentUser(data);
         } catch (error) {
             console.error("Failed to fetch profile", error);

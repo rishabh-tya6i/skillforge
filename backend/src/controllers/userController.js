@@ -34,6 +34,22 @@ const getUserById = async (req, res) => {
     }
 };
 
+// @desc    Get current user profile
+// @route   GET /api/users/profile
+// @access  Private
+const getUserProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('-password');
+        if (user) {
+            res.json(user);
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // @desc    Update user
 // @route   PUT /api/users/:id
 // @access  Private/Admin
@@ -80,4 +96,4 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { getUsers, getUserById, updateUser, deleteUser };
+module.exports = { getUsers, getUserById, updateUser, deleteUser, getUserProfile };

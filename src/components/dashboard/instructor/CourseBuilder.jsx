@@ -18,7 +18,7 @@ const CourseBuilder = ({ course, onUpdate, onBack }) => {
         };
         const updated = [...sections, newSection];
         setSections(updated);
-        onUpdate(course.id, { curriculum: updated });
+        onUpdate(course._id || course.id, { curriculum: updated });
     };
 
     const handleAddLesson = (sectionId) => {
@@ -38,7 +38,7 @@ const CourseBuilder = ({ course, onUpdate, onBack }) => {
             return sec;
         });
         setSections(updatedSections);
-        onUpdate(course.id, { curriculum: updatedSections });
+        onUpdate(course._id || course.id, { curriculum: updatedSections });
         setIsAddLessonOpen(null);
         setNewLesson({ title: '', type: 'video' });
     };
@@ -54,7 +54,7 @@ const CourseBuilder = ({ course, onUpdate, onBack }) => {
             return sec;
         });
         setSections(updatedSections);
-        onUpdate(course.id, { curriculum: updatedSections });
+        onUpdate(course._id || course.id, { curriculum: updatedSections });
     };
 
     return (

@@ -12,9 +12,14 @@ api.interceptors.request.use(
     (config) => {
         const user = localStorage.getItem('skillforge_user');
         if (user) {
-            const { token } = JSON.parse(user);
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
+            try {
+                const parsedUser = JSON.parse(user);
+                if (parsedUser && parsedUser.token) {
+                    config.headers = config.headers || {};
+                    config.headers.Authorization = `Bearer ${parsedUser.token}`;
+                }
+            } catch (error) {
+                // Invalid JSON or no token, proceed without Authorization header
             }
         }
         return config;

@@ -12,8 +12,16 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const storedUser = localStorage.getItem('skillforge_user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
-            setIsAuthenticated(true);
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                if (parsedUser && parsedUser.token) {
+                    setUser(parsedUser);
+                    setIsAuthenticated(true);
+                }
+            } catch (error) {
+                console.error("Failed to parse stored user", error);
+                localStorage.removeItem('skillforge_user');
+            }
         }
         setLoading(false);
     }, []);
@@ -21,9 +29,19 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         try {
             const { data } = await api.post('/auth/login', { email, password });
-            setUser(data);
+
+            // Explicitly store necessary data for security and consistency
+            const userData = {
+                _id: data._id,
+                name: data.name,
+                email: data.email,
+                role: data.role,
+                token: data.token
+            };
+
+            setUser(userData);
             setIsAuthenticated(true);
-            localStorage.setItem('skillforge_user', JSON.stringify(data));
+            localStorage.setItem('skillforge_user', JSON.stringify(userData));
             return { success: true };
         } catch (error) {
             return {
@@ -36,9 +54,18 @@ export const AuthProvider = ({ children }) => {
     const register = async (name, email, password, role) => {
         try {
             const { data } = await api.post('/auth/register', { name, email, password, role });
-            setUser(data);
+
+            const userData = {
+                _id: data._id,
+                name: data.name,
+                email: data.email,
+                role: data.role,
+                token: data.token
+            };
+
+            setUser(userData);
             setIsAuthenticated(true);
-            localStorage.setItem('skillforge_user', JSON.stringify(data));
+            localStorage.setItem('skillforge_user', JSON.stringify(userData));
             return { success: true };
         } catch (error) {
             return {
