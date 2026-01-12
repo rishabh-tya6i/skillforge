@@ -6,7 +6,8 @@ import { ChevronLeft, Play, CheckCircle, FileText, Lock, Menu } from 'lucide-rea
 
 const LessonPlayer = ({ course, onBack }) => {
     // Flatten curriculum to easily find next/prev
-    const allLessons = course.curriculum?.flatMap(sec => sec.lessons) || [];
+    const allLessons = course.modules?.flatMap(sec => sec.lessons) || [];
+    const getImageUrl = (path) => path && path.startsWith('http') ? path : `http://localhost:5000${path}`;
     const [currentLesson, setCurrentLesson] = useState(allLessons[0]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -43,15 +44,15 @@ const LessonPlayer = ({ course, onBack }) => {
                             <video
                                 controls
                                 className="w-full h-full"
-                                poster={course.thumbnail}
-                                src={currentLesson.url}
+                                poster={getImageUrl(course.thumbnail)}
+                                src={getImageUrl(currentLesson.contentUrl)}
                             />
                         </div>
                     ) : (
                         <div className="max-w-3xl mx-auto py-12 px-6">
                             <GlassCard className="p-8 prose prose-invert prose-lg max-w-none">
                                 <h1>{currentLesson.title}</h1>
-                                <p>{currentLesson.content}</p>
+                                <div>{currentLesson.textContent}</div>
                             </GlassCard>
                         </div>
                     )}
@@ -77,24 +78,24 @@ const LessonPlayer = ({ course, onBack }) => {
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar">
-                        {course.curriculum?.map((section, idx) => (
-                            <div key={section.id}>
+                        {course.modules?.map((section, idx) => (
+                            <div key={section._id || idx}>
                                 <div className="px-4 py-3 bg-white/5 border-y border-white/5">
                                     <h4 className="text-sm font-bold text-gray-300">Section {idx + 1}: {section.title}</h4>
                                 </div>
                                 <div>
                                     {section.lessons.map(lesson => (
                                         <button
-                                            key={lesson.id}
+                                            key={lesson._id}
                                             onClick={() => setCurrentLesson(lesson)}
                                             className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-white/5 transition-colors border-l-2
-                                                ${currentLesson.id === lesson.id ? 'border-primary bg-primary/5' : 'border-transparent'}`}
+                                                ${currentLesson._id === lesson._id ? 'border-primary bg-primary/5' : 'border-transparent'}`}
                                         >
                                             <div className="mt-0.5">
                                                 {lesson.type === 'video' ? <Play className="w-4 h-4 text-gray-500" /> : <FileText className="w-4 h-4 text-gray-500" />}
                                             </div>
                                             <div>
-                                                <p className={`text-sm font-medium ${currentLesson.id === lesson.id ? 'text-primary' : 'text-gray-400'}`}>
+                                                <p className={`text-sm font-medium ${currentLesson._id === lesson._id ? 'text-primary' : 'text-gray-400'}`}>
                                                     {lesson.title}
                                                 </p>
                                                 <p className="text-xs text-gray-600 mt-0.5">{lesson.duration}</p>

@@ -26,6 +26,10 @@ app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api', businessRoutes); // Mounts to /api/payments/... and /api/analytics/... directly
+app.use('/api/upload', require('./routes/uploadRoutes'));
+
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Global Error Handler
 app.use((err, req, res, next) => {

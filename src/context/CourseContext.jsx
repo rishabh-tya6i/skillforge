@@ -20,9 +20,59 @@ export const CourseProvider = ({ children }) => {
         }
     };
 
+    const fetchAdminCourses = async () => {
+        try {
+            setLoading(true);
+            const { data } = await api.get('/courses/admin');
+            setCourses(data);
+        } catch (error) {
+            console.error("Failed to fetch admin courses", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchInstructorCourses = async () => {
+        try {
+            setLoading(true);
+            const { data } = await api.get('/courses/my');
+            setCourses(data);
+        } catch (error) {
+            console.error("Failed to fetch instructor courses", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchCourseById = async (id) => {
+        try {
+            setLoading(true);
+            const { data } = await api.get(`/courses/${id}`);
+            return { success: true, course: data };
+        } catch (error) {
+            console.error("Failed to fetch course", error);
+            return { success: false, message: error.response?.data?.message };
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const addCourse = async (courseData) => {
         try {
-            const { data } = await api.post('/courses', courseData);
+            const config = {
+                headers: {
+                    // Important: Set to undefined for FormData so browser sets the boundary
+                    'Content-Type': courseData instanceof FormData ? 'multipart/form-data' : 'application/json'
+                }
+            };
+            // Fix: 'multipart/form-data' requires boundary. Browser sets it if we don't force it.
+            // But if we override axios default, we must ensure we don't break it.
+            // The safest way is to delete the header if it's FormData.
+            if (courseData instanceof FormData) {
+                delete config.headers['Content-Type'];
+            }
+
+            const { data } = await api.post('/courses', courseData, config);
             setCourses([...courses, data]);
             return { success: true, course: data };
         } catch (error) {
@@ -32,7 +82,15 @@ export const CourseProvider = ({ children }) => {
 
     const updateCourse = async (id, updates) => {
         try {
-            const { data } = await api.put(`/courses/${id}`, updates);
+            const config = {
+                headers: {
+                    'Content-Type': updates instanceof FormData ? 'multipart/form-data' : 'application/json'
+                }
+            };
+            if (updates instanceof FormData) {
+                delete config.headers['Content-Type'];
+            }
+            const { data } = await api.put(`/courses/${id}`, updates, config);
             setCourses(courses.map(c => c._id === id ? data : c));
             return { success: true };
         } catch (error) {
@@ -63,6 +121,9 @@ export const CourseProvider = ({ children }) => {
             courses,
             loading,
             fetchCourses,
+            fetchAdminCourses,
+            fetchInstructorCourses,
+            fetchCourseById,
             addCourse,
             updateCourse,
             deleteCourse

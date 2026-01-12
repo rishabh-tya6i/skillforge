@@ -5,36 +5,64 @@ import { Button } from '../../ui/Button';
 import { useCourses } from '../../../context/CourseContext';
 import { PlusCircle, Edit2, Trash2, Eye, BookOpen, Video, FileText } from 'lucide-react';
 import CourseBuilder from './CourseBuilder';
+import api from '../../../api/axios';
 
 const InstructorCourses = ({ user }) => {
-    const { courses, addCourse, updateCourse } = useCourses();
+    const { courses, addCourse, updateCourse, deleteCourse, fetchInstructorCourses } = useCourses();
+
+    React.useEffect(() => {
+        fetchInstructorCourses();
+    }, []);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState(null); // ID of course being edited
     const [newCourse, setNewCourse] = useState({
         title: '',
         price: '',
         description: '',
-        thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=60'
+        category: '',
+        thumbnail: ''
     });
+    const [uploading, setUploading] = useState(false);
 
-    // Filter courses for this instructor
-    const myCourses = courses.filter(c => c.instructorId === (user.id || 1));
+    // Courses are now fetched directly for the instructor
+    const myCourses = courses;
 
-    const handleCreateCourse = (e) => {
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setNewCourse({ ...newCourse, thumbnailFile: file, thumbnail: URL.createObjectURL(file) });
+        }
+    };
+
+    const handleCreateCourse = async (e) => {
         e.preventDefault();
-        addCourse({
-            ...newCourse,
-            instructorId: user.id || 1,
-            students: [],
-            revenue: 0,
-            status: 'Draft'
-        });
-        setIsCreateModalOpen(false);
-        setNewCourse({ title: '', price: '', description: '', thumbnail: '' });
+
+        const coursePayload = new FormData();
+        coursePayload.append('title', newCourse.title);
+        coursePayload.append('description', newCourse.description);
+        coursePayload.append('category', newCourse.category);
+        coursePayload.append('price', newCourse.price);
+        coursePayload.append('status', 'draft');
+
+        if (newCourse.thumbnailFile) {
+            coursePayload.append('thumbnail', newCourse.thumbnailFile);
+        } else if (newCourse.thumbnail) {
+            coursePayload.append('thumbnail', newCourse.thumbnail);
+        }
+
+        const result = await addCourse(coursePayload);
+
+        if (result.success) {
+            setIsCreateModalOpen(false);
+            setNewCourse({ title: '', price: '', description: '', category: '', thumbnail: '', thumbnailFile: null });
+        } else {
+            console.error(result.message);
+            // Optionally set an error state here to show to user
+        }
     };
 
     if (selectedCourse) {
-        const courseToEdit = courses.find(c => c.id === selectedCourse);
+        const courseToEdit = courses.find(c => c._id === selectedCourse);
         return (
             <CourseBuilder
                 course={courseToEdit}
@@ -58,7 +86,7 @@ const InstructorCourses = ({ user }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {myCourses.map(course => (
-                    <GlassCard key={course.id} className="group flex flex-col h-full bg-[#111827]/80 hover:border-primary/50 transition-all">
+                    <GlassCard key={course._id} className="group flex flex-col h-full bg-[#111827]/80 hover:border-primary/50 transition-all">
                         <div className="relative aspect-video rounded-xl overflow-hidden mb-4">
                             <img src={course.thumbnail || "https://via.placeholder.com/300"} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                             <div className="absolute top-2 right-2 px-2 py-1 rounded bg-black/60 backdrop-blur text-xs font-bold text-white border border-white/10">
@@ -87,7 +115,7 @@ const InstructorCourses = ({ user }) => {
                         </div>
 
                         <div className="flex gap-2 pt-4 border-t border-white/5">
-                            <Button onClick={() => setSelectedCourse(course.id)} variant="secondary" className="flex-1 text-xs">
+                            <Button onClick={() => setSelectedCourse(course._id)} variant="secondary" className="flex-1 text-xs">
                                 <Edit2 className="w-3 h-3 mr-2" /> Edit Curriculum
                             </Button>
                             <Button variant="ghost" className="text-gray-400 hover:text-white">
@@ -95,6 +123,9 @@ const InstructorCourses = ({ user }) => {
                             </Button>
                             <Button variant="ghost" className="text-gray-400 hover:text-white">
                                 <FileText className="w-4 h-4" />
+                            </Button>
+                            <Button onClick={() => { if (window.confirm('Delete course?')) deleteCourse(course._id) }} variant="ghost" className="text-gray-400 hover:text-red-500">
+                                <Trash2 className="w-4 h-4" />
                             </Button>
                         </div>
                     </GlassCard>
@@ -122,6 +153,12 @@ const InstructorCourses = ({ user }) => {
                                 <input type="text" required className="w-full bg-[#0B1220] border border-white/10 rounded-lg px-4 py-2 text-white"
                                     value={newCourse.title} onChange={e => setNewCourse({ ...newCourse, title: e.target.value })} />
                             </div>
+
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Category</label>
+                                <input type="text" required placeholder="e.g. Development, Design" className="w-full bg-[#0B1220] border border-white/10 rounded-lg px-4 py-2 text-white"
+                                    value={newCourse.category} onChange={e => setNewCourse({ ...newCourse, category: e.target.value })} />
+                            </div>
                             <div>
                                 <label className="block text-sm text-gray-400 mb-1">Price ($)</label>
                                 <input type="number" required className="w-full bg-[#0B1220] border border-white/10 rounded-lg px-4 py-2 text-white"
@@ -131,6 +168,18 @@ const InstructorCourses = ({ user }) => {
                                 <label className="block text-sm text-gray-400 mb-1">Description</label>
                                 <textarea required rows="4" className="w-full bg-[#0B1220] border border-white/10 rounded-lg px-4 py-2 text-white"
                                     value={newCourse.description} onChange={e => setNewCourse({ ...newCourse, description: e.target.value })}></textarea>
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Thumbnail</label>
+                                <input type="text" placeholder="Image URL" readOnly className="w-full bg-[#0B1220] border border-white/10 rounded-lg px-4 py-2 text-white mb-2"
+                                    value={newCourse.thumbnail} />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/80"
+                                />
+                                {uploading && <p className="text-sm text-blue-400 mt-1">Uploading...</p>}
                             </div>
                             <div className="flex justify-end gap-3 mt-6">
                                 <Button type="button" variant="ghost" onClick={() => setIsCreateModalOpen(false)}>Cancel</Button>

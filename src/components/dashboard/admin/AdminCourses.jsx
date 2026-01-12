@@ -7,23 +7,31 @@ import { useUser } from '../../../context/UserContext';
 import { BookOpen, CheckCircle, XCircle, Eye, Archive, DollarSign } from 'lucide-react';
 
 const AdminCourses = () => {
-    const { courses, updateCourse, deleteCourse } = useCourses();
+    const { courses, updateCourse, deleteCourse, fetchAdminCourses } = useCourses();
     const { users } = useUser();
     const [filter, setFilter] = useState('All');
 
+    React.useEffect(() => {
+        fetchAdminCourses();
+    }, []);
+
     // Helper to get instructor name
-    const getInstructorName = (id) => {
-        const instructor = users.find(u => u.id === id);
-        return instructor ? instructor.name : 'Unknown';
+    // Helper to get instructor name
+    const getInstructorName = (course) => {
+        return course.instructor?.name || 'Unknown';
     };
 
     const handleStatusChange = (id, newStatus) => {
-        updateCourse(id, { status: newStatus });
+        if (newStatus === 'active') {
+            updateCourse(id, { status: 'active', approvalStatus: 'approved' });
+        } else {
+            updateCourse(id, { status: 'draft', approvalStatus: 'pending' });
+        }
     };
 
     const handleExport = () => {
         const headers = ['ID', 'Title', 'Instructor', 'Price', 'Status'];
-        const rows = courses.map(c => [c.id, c.title, getInstructorName(c.instructorId), c.price, c.status]);
+        const rows = courses.map(c => [c._id, c.title, getInstructorName(c), c.price, c.status]);
         const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map(e => e.join(",")).join("\n");
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
@@ -34,7 +42,7 @@ const AdminCourses = () => {
         document.body.removeChild(link);
     };
 
-    const filteredCourses = filter === 'All' ? courses : courses.filter(c => c.status === filter);
+    const filteredCourses = filter === 'All' ? courses : courses.filter(c => c.status === filter.toLowerCase());
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -73,7 +81,7 @@ const AdminCourses = () => {
                         </thead>
                         <tbody>
                             {filteredCourses.map(course => (
-                                <tr key={course.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                <tr key={course._id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                                     <td className="p-4 text-white font-medium">
                                         <div className="flex items-center gap-3">
                                             <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
@@ -82,28 +90,28 @@ const AdminCourses = () => {
                                             {course.title}
                                         </div>
                                     </td>
-                                    <td className="p-4 text-gray-400 text-sm">{getInstructorName(course.instructorId)}</td>
+                                    <td className="p-4 text-gray-400 text-sm">{getInstructorName(course)}</td>
                                     <td className="p-4 text-white font-mono">${course.price}</td>
                                     <td className="p-4">
                                         <span className={`px-2 py-1 rounded text-xs font-bold uppercase border
-                                            ${course.status === 'Active' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                                course.status === 'Draft' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
+                                            ${course.status === 'active' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                                                course.status === 'draft' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
                                                     'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
                                             {course.status}
                                         </span>
                                     </td>
                                     <td className="p-4 text-right flex justify-end gap-2">
-                                        {course.status !== 'Active' && (
+                                        {course.status !== 'active' && (
                                             <button
-                                                onClick={() => handleStatusChange(course.id, 'Active')}
+                                                onClick={() => handleStatusChange(course._id, 'active')}
                                                 className="p-2 hover:bg-green-500/20 rounded-lg text-gray-400 hover:text-green-400 transition-colors" title="Approve"
                                             >
                                                 <CheckCircle className="w-4 h-4" />
                                             </button>
                                         )}
-                                        {course.status === 'Active' && (
+                                        {course.status === 'active' && (
                                             <button
-                                                onClick={() => handleStatusChange(course.id, 'Draft')}
+                                                onClick={() => handleStatusChange(course._id, 'draft')}
                                                 className="p-2 hover:bg-yellow-500/20 rounded-lg text-gray-400 hover:text-yellow-400 transition-colors" title="Deactivate"
                                             >
                                                 <XCircle className="w-4 h-4" />
@@ -112,7 +120,7 @@ const AdminCourses = () => {
                                         <button className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" title="View Details">
                                             <Eye className="w-4 h-4" />
                                         </button>
-                                        <button onClick={() => deleteCourse(course.id)} className="p-2 hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-500 transition-colors" title="Archive/Delete">
+                                        <button onClick={() => deleteCourse(course._id)} className="p-2 hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-500 transition-colors" title="Archive/Delete">
                                             <Archive className="w-4 h-4" />
                                         </button>
                                     </td>

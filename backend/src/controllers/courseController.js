@@ -50,12 +50,20 @@ const getCourseById = async (req, res) => {
 const createCourse = async (req, res) => {
     try {
         const { title, description, category, price, thumbnail } = req.body;
+
+        let thumbnailUrl = '';
+        if (req.file) {
+            thumbnailUrl = `/uploads/${req.file.filename}`;
+        } else if (typeof thumbnail === 'string') {
+            thumbnailUrl = thumbnail;
+        }
+
         const course = new Course({
             title,
             description,
             category,
             price,
-            thumbnail,
+            thumbnail: thumbnailUrl,
             instructor: req.user._id,
         });
 
@@ -82,15 +90,45 @@ const updateCourse = async (req, res) => {
             course.title = req.body.title || course.title;
             course.description = req.body.description || course.description;
             course.price = req.body.price !== undefined ? req.body.price : course.price;
-            course.thumbnail = req.body.thumbnail || course.thumbnail;
+            if (req.file) {
+                course.thumbnail = `/uploads/${req.file.filename}`;
+            } else if (req.body.thumbnail && typeof req.body.thumbnail === 'string') {
+                course.thumbnail = req.body.thumbnail;
+            }
+
             course.modules = req.body.modules || course.modules;
             course.status = req.body.status || course.status;
+            course.approvalStatus = req.body.approvalStatus || course.approvalStatus;
 
             const updatedCourse = await course.save();
             res.json(updatedCourse);
         } else {
             res.status(404).json({ message: 'Course not found' });
         }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get all courses (Admin)
+// @route   GET /api/courses/admin
+// @access  Private/Admin
+const getAdminCourses = async (req, res) => {
+    try {
+        const courses = await Course.find({}).populate('instructor', 'name email');
+        res.json(courses);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get logged in instructor courses
+// @route   GET /api/courses/my
+// @access  Private/Instructor
+const getMyCourses = async (req, res) => {
+    try {
+        const courses = await Course.find({ instructor: req.user._id });
+        res.json(courses);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -117,4 +155,4 @@ const deleteCourse = async (req, res) => {
     }
 };
 
-module.exports = { getCourses, getCourseById, createCourse, updateCourse, deleteCourse };
+module.exports = { getCourses, getCourseById, createCourse, updateCourse, deleteCourse, getAdminCourses, getMyCourses };

@@ -2,14 +2,17 @@
 import React from 'react';
 import { GlassCard } from '../../ui/GlassCard';
 import { Button } from '../../ui/Button';
-import { useCourses } from '../../../context/CourseContext';
+import { useEnrollments } from '../../../context/EnrollmentContext';
 import { BookOpen, Clock, Award, TrendingUp, Play } from 'lucide-react';
 
 const StudentOverview = ({ user, setActiveView }) => {
-    const { courses } = useCourses();
+    // const { courses } = useCourses(); // Not needed if we only show enrolled
+    const { myEnrollments } = useEnrollments();
 
     // Stats Logic
-    const myCourses = courses.filter(c => c.students.includes(user.id || 3));
+    const myCourses = myEnrollments.map(e => e.course);
+    const coursesEnrolledCount = myEnrollments.length;
+
     const completedCourses = 2; // Mock
     const certificates = 1; // Mock
     const hoursLearned = 12.5; // Mock
@@ -41,7 +44,7 @@ const StudentOverview = ({ user, setActiveView }) => {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                    { label: "Courses Enrolled", value: myCourses.length, icon: BookOpen, color: "text-blue-400", bg: "bg-blue-500/10" },
+                    { label: "Courses Enrolled", value: coursesEnrolledCount, icon: BookOpen, color: "text-blue-400", bg: "bg-blue-500/10" },
                     { label: "Hours Learned", value: hoursLearned, icon: Clock, color: "text-purple-400", bg: "bg-purple-500/10" },
                     { label: "Certificates", value: certificates, icon: Award, color: "text-yellow-400", bg: "bg-yellow-500/10" },
                     { label: "Completion Rate", value: "48%", icon: TrendingUp, color: "text-green-400", bg: "bg-green-500/10" }
@@ -63,10 +66,10 @@ const StudentOverview = ({ user, setActiveView }) => {
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                     <Play className="w-5 h-5 text-primary" /> Continue Learning
                 </h2>
-                {myCourses.length > 0 ? (
+                {myEnrollments.length > 0 ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {myCourses.slice(0, 2).map(course => (
-                            <GlassCard key={course.id} className="p-6 group hover:border-primary/30 transition-colors">
+                        {myEnrollments.slice(0, 2).map(({ course, progress, _id }) => (
+                            <GlassCard key={_id} className="p-6 group hover:border-primary/30 transition-colors">
                                 <div className="flex flex-col gap-4">
                                     <div className="flex justify-between items-start">
                                         <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors line-clamp-1">{course.title}</h3>
@@ -75,11 +78,11 @@ const StudentOverview = ({ user, setActiveView }) => {
 
                                     <div className="space-y-2">
                                         <div className="flex justify-between text-xs font-medium">
-                                            <span className="text-primary">35% Complete</span>
-                                            <span className="text-gray-500">6/18 Lessons</span>
+                                            <span className="text-primary">{progress?.progressPercentage || 0}% Complete</span>
+                                            <span className="text-gray-500">{progress?.completedLessons?.length || 0} Lessons</span>
                                         </div>
                                         <div className="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden">
-                                            <div className="h-full bg-gradient-to-r from-primary to-accent-cyan w-[35%] rounded-full" />
+                                            <div className="h-full bg-gradient-to-r from-primary to-accent-cyan rounded-full" style={{ width: `${progress?.progressPercentage || 0}%` }} />
                                         </div>
                                     </div>
 
