@@ -5,69 +5,7 @@ import CourseCard from '../components/ui/CourseCard';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 
-// Enhanced Dummy Data
-const allCourses = [
-    {
-        id: 1,
-        title: 'Full Stack Web Development with React & Node',
-        category: 'Full Stack',
-        price: 99,
-        duration: '40h',
-        lessons: 120,
-        level: 'Advanced',
-        image: 'https://images.unsplash.com/photo-1593720213428-28a5b9e94613?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'
-    },
-    {
-        id: 2,
-        title: 'Data Science Specialist: Python, SQL & ML',
-        category: 'Data Science',
-        price: 89,
-        duration: '56h',
-        lessons: 154,
-        level: 'Expert',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'
-    },
-    {
-        id: 3,
-        title: 'UI/UX Design Masterclass: From Zero to Hero',
-        category: 'Design',
-        price: 79,
-        duration: '28h',
-        lessons: 64,
-        level: 'Beginner',
-        image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'
-    },
-    {
-        id: 4,
-        title: 'Frontend Development with React.js',
-        category: 'Frontend',
-        price: 69,
-        duration: '32h',
-        lessons: 85,
-        level: 'Intermediate',
-        image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'
-    },
-    {
-        id: 5,
-        title: 'Artificial Intelligence & Machine Learning',
-        category: 'AI/ML',
-        price: 119,
-        duration: '60h',
-        lessons: 180,
-        level: 'Expert',
-        image: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'
-    },
-    {
-        id: 6,
-        title: 'Backend Development with Node.js',
-        category: 'Backend',
-        price: 75,
-        duration: '35h',
-        lessons: 90,
-        level: 'Intermediate',
-        image: 'https://images.unsplash.com/photo-1629904853716-6c29f6024d84?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'
-    }
-];
+import { useCourses } from '../context/CourseContext';
 
 const categories = [
     { name: "All", icon: Filter },
@@ -80,10 +18,11 @@ const categories = [
 ];
 
 const Courses = () => {
+    const { courses } = useCourses();
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [searchQuery, setSearchQuery] = useState("");
 
-    const filteredCourses = allCourses.filter(course => {
+    const filteredCourses = courses.filter(course => {
         const matchesCategory = selectedCategory === "All" || course.category === selectedCategory;
         const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
@@ -142,7 +81,7 @@ const Courses = () => {
                 {filteredCourses.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredCourses.map((course) => (
-                            <CourseCard key={course.id} course={course} />
+                            <CourseCard key={course._id || course.id} course={course} />
                         ))}
                     </div>
                 ) : (

@@ -7,40 +7,12 @@ import CourseCard from '../components/ui/CourseCard';
 import { GlassCard } from '../components/ui/GlassCard';
 
 // Enhanced Dummy Data
-const featuredCourses = [
-    {
-        id: 1,
-        title: 'Full Stack Web Development with React & Node',
-        category: 'Development',
-        price: 99,
-        duration: '40h',
-        lessons: 120,
-        level: 'Intermediate',
-        image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'
-    },
-    {
-        id: 2,
-        title: 'Data Science Specialist: Python, SQL & ML',
-        category: 'Data Science',
-        price: 89,
-        duration: '56h',
-        lessons: 154,
-        level: 'Advanced',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'
-    },
-    {
-        id: 3,
-        title: 'UI/UX Design Masterclass: From Zero to Hero',
-        category: 'Design',
-        price: 79,
-        duration: '28h',
-        lessons: 64,
-        level: 'Beginner',
-        image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'
-    }
-];
+import { useCourses } from '../context/CourseContext';
 
 const Home = () => {
+    const { courses } = useCourses();
+    const featuredCourses = courses.slice(0, 3);
+
     return (
         <div className="overflow-hidden bg-background text-gray-200">
 
@@ -245,7 +217,7 @@ const Home = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {featuredCourses.map((course) => (
-                            <CourseCard key={course.id} course={course} />
+                            <CourseCard key={course._id || course.id} course={course} />
                         ))}
                     </div>
                 </div>

@@ -9,13 +9,22 @@ import { GlassCard } from './GlassCard';
 const CourseCard = ({ course }) => {
     const { addToCart } = useCart();
 
+    const getImageUrl = (path) => {
+        if (!path) return 'https://via.placeholder.com/300?text=No+Image'; // Fallback
+        return path.startsWith('http') ? path : `http://localhost:5000${path}`;
+    };
+
+    const lessonCount = course.modules?.reduce((acc, m) => acc + m.lessons.length, 0) || course.lessons || 0;
+    // Mock duration calculation if not present, or parse it
+    const duration = course.duration || `${course.modules?.length * 2 || 0}h`;
+
     return (
         <GlassCard hoverEffect className="p-0 border-white/5 h-full flex flex-col group">
             {/* Thumbnail */}
             <div className="relative h-48 overflow-hidden rounded-t-2xl">
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0B1220] to-transparent opacity-60 z-10" />
                 <img
-                    src={course.image}
+                    src={getImageUrl(course.thumbnail || course.image)}
                     alt={course.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
@@ -39,17 +48,17 @@ const CourseCard = ({ course }) => {
                 </div>
 
                 <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 group-hover:text-primary transition-colors">
-                    <Link to={`/courses/${course.id}`}>{course.title}</Link>
+                    <Link to={`/courses/${course._id || course.id}`}>{course.title}</Link>
                 </h3>
 
                 <div className="flex items-center text-gray-400 text-sm mb-6 space-x-4">
                     <div className="flex items-center">
                         <Clock className="w-4 h-4 mr-1 text-primary" />
-                        <span>{course.duration}</span>
+                        <span>{duration}</span>
                     </div>
                     <div className="flex items-center">
                         <BookOpen className="w-4 h-4 mr-1 text-primary" />
-                        <span>{course.lessons} Lessons</span>
+                        <span>{lessonCount} Lessons</span>
                     </div>
                 </div>
 
@@ -57,7 +66,7 @@ const CourseCard = ({ course }) => {
                     <Button variant="ghost" className="flex-1 py-2 text-sm text-gray-300 hover:text-white border border-white/10 hover:border-white/30" onClick={() => addToCart(course)}>
                         Add to Cart
                     </Button>
-                    <Link to={`/courses/${course.id}`} className="flex-1">
+                    <Link to={`/courses/${course._id || course.id}`} className="flex-1">
                         <Button variant="neon" className="w-full py-2 text-sm shadow-none group/btn">
                             Details <ChevronRight className="w-4 h-4 ml-1 group-hover/btn:translate-x-1 transition-transform" />
                         </Button>
