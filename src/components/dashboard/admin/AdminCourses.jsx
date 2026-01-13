@@ -4,12 +4,21 @@ import { GlassCard } from '../../ui/GlassCard';
 import { Button } from '../../ui/Button';
 import { useCourses } from '../../../context/CourseContext';
 import { useUser } from '../../../context/UserContext';
-import { BookOpen, CheckCircle, XCircle, Eye, Archive, DollarSign } from 'lucide-react';
+import { BookOpen, CheckCircle, XCircle, Eye, Archive, DollarSign, PlusCircle, Edit2 } from 'lucide-react';
+import CourseBuilder from '../instructor/CourseBuilder';
 
 const AdminCourses = () => {
-    const { courses, updateCourse, deleteCourse, fetchAdminCourses } = useCourses();
+    const { courses, updateCourse, deleteCourse, fetchAdminCourses, addCourse } = useCourses();
     const { users } = useUser();
     const [filter, setFilter] = useState('All');
+
+    // Create/Edit State
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [selectedCourseId, setSelectedCourseId] = useState(null);
+    const [newCourse, setNewCourse] = useState({
+        title: '', price: '', description: '', category: '', thumbnail: ''
+    });
+    const [uploading, setUploading] = useState(false);
 
     React.useEffect(() => {
         fetchAdminCourses();
@@ -29,6 +38,38 @@ const AdminCourses = () => {
         }
     };
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setNewCourse({ ...newCourse, thumbnailFile: file, thumbnail: URL.createObjectURL(file) });
+        }
+    };
+
+    const handleCreateCourse = async (e) => {
+        e.preventDefault();
+        const coursePayload = new FormData();
+        coursePayload.append('title', newCourse.title);
+        coursePayload.append('description', newCourse.description);
+        coursePayload.append('category', newCourse.category);
+        coursePayload.append('price', newCourse.price);
+        coursePayload.append('status', 'draft');
+
+        if (newCourse.thumbnailFile) {
+            coursePayload.append('thumbnail', newCourse.thumbnailFile);
+        } else if (newCourse.thumbnail) {
+            coursePayload.append('thumbnail', newCourse.thumbnail);
+        }
+
+        const result = await addCourse(coursePayload);
+
+        if (result.success) {
+            setIsCreateModalOpen(false);
+            setNewCourse({ title: '', price: '', description: '', category: '', thumbnail: '', thumbnailFile: null });
+        } else {
+            console.error(result.message);
+        }
+    };
+
     const handleExport = () => {
         const headers = ['ID', 'Title', 'Instructor', 'Price', 'Status'];
         const rows = courses.map(c => [c._id, c.title, getInstructorName(c), c.price, c.status]);
@@ -43,6 +84,20 @@ const AdminCourses = () => {
     };
 
     const filteredCourses = filter === 'All' ? courses : courses.filter(c => c.status === filter.toLowerCase());
+
+
+    if (selectedCourseId) {
+        const courseToEdit = courses.find(c => c._id === selectedCourseId);
+        if (courseToEdit) {
+            return (
+                <CourseBuilder
+                    course={courseToEdit}
+                    onUpdate={updateCourse}
+                    onBack={() => setSelectedCourseId(null)}
+                />
+            );
+        }
+    }
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -63,7 +118,10 @@ const AdminCourses = () => {
                             </button>
                         ))}
                     </div>
-                    <Button onClick={handleExport} variant="primary" className="text-sm">Export List</Button>
+                    <Button onClick={() => setIsCreateModalOpen(true)} variant="primary" className="text-sm">
+                        <PlusCircle className="w-4 h-4 mr-2" /> Create Course
+                    </Button>
+                    <Button onClick={handleExport} variant="secondary" className="text-sm">Export</Button>
                 </div>
             </div>
 
@@ -117,8 +175,8 @@ const AdminCourses = () => {
                                                 <XCircle className="w-4 h-4" />
                                             </button>
                                         )}
-                                        <button className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" title="View Details">
-                                            <Eye className="w-4 h-4" />
+                                        <button onClick={() => setSelectedCourseId(course._id)} className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" title="Edit/View">
+                                            <Edit2 className="w-4 h-4" />
                                         </button>
                                         <button onClick={() => deleteCourse(course._id)} className="p-2 hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-500 transition-colors" title="Archive/Delete">
                                             <Archive className="w-4 h-4" />
@@ -130,6 +188,53 @@ const AdminCourses = () => {
                     </table>
                 </div>
             </GlassCard>
+            {/* Create Modal */}
+            {isCreateModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
+                    <GlassCard className="w-full max-w-lg p-8 relative animate-in zoom-in-95">
+                        <h2 className="text-2xl font-bold text-white mb-6">Create New Course (Admin)</h2>
+                        <form onSubmit={handleCreateCourse} className="space-y-4">
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Course Title</label>
+                                <input type="text" required className="w-full bg-[#0B1220] border border-white/10 rounded-lg px-4 py-2 text-white"
+                                    value={newCourse.title} onChange={e => setNewCourse({ ...newCourse, title: e.target.value })} />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Category</label>
+                                <input type="text" required placeholder="e.g. Development, Design" className="w-full bg-[#0B1220] border border-white/10 rounded-lg px-4 py-2 text-white"
+                                    value={newCourse.category} onChange={e => setNewCourse({ ...newCourse, category: e.target.value })} />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Price ($)</label>
+                                <input type="number" required className="w-full bg-[#0B1220] border border-white/10 rounded-lg px-4 py-2 text-white"
+                                    value={newCourse.price} onChange={e => setNewCourse({ ...newCourse, price: e.target.value })} />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Description</label>
+                                <textarea required rows="4" className="w-full bg-[#0B1220] border border-white/10 rounded-lg px-4 py-2 text-white"
+                                    value={newCourse.description} onChange={e => setNewCourse({ ...newCourse, description: e.target.value })}></textarea>
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Thumbnail</label>
+                                <input type="text" placeholder="Image URL" readOnly className="w-full bg-[#0B1220] border border-white/10 rounded-lg px-4 py-2 text-white mb-2"
+                                    value={newCourse.thumbnail} />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/80"
+                                />
+                                {uploading && <p className="text-sm text-blue-400 mt-1">Uploading...</p>}
+                            </div>
+                            <div className="flex justify-end gap-3 mt-6">
+                                <Button type="button" variant="ghost" onClick={() => setIsCreateModalOpen(false)}>Cancel</Button>
+                                <Button type="submit" variant="primary">Create Draft</Button>
+                            </div>
+                        </form>
+                    </GlassCard>
+                </div>
+            )}
         </div>
     );
 };
