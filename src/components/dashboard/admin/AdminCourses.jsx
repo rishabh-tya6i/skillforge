@@ -8,6 +8,7 @@ import { BookOpen, CheckCircle, XCircle, Eye, Archive, DollarSign, PlusCircle, E
 import CourseBuilder from '../instructor/CourseBuilder';
 
 const AdminCourses = () => {
+
     const { courses, updateCourse, deleteCourse, fetchAdminCourses, addCourse } = useCourses();
     const { users } = useUser();
     const [filter, setFilter] = useState('All');
@@ -19,6 +20,7 @@ const AdminCourses = () => {
         title: '', price: '', description: '', category: '', thumbnail: ''
     });
     const [uploading, setUploading] = useState(false);
+
 
     React.useEffect(() => {
         fetchAdminCourses();
@@ -36,6 +38,7 @@ const AdminCourses = () => {
         } else {
             updateCourse(id, { status: 'draft', approvalStatus: 'pending' });
         }
+
     };
 
     const handleFileChange = (e) => {
@@ -68,6 +71,7 @@ const AdminCourses = () => {
         } else {
             console.error(result.message);
         }
+
     };
 
     const handleExport = () => {
@@ -86,6 +90,7 @@ const AdminCourses = () => {
     const filteredCourses = filter === 'All' ? courses : courses.filter(c => c.status === filter.toLowerCase());
 
 
+
     if (selectedCourseId) {
         const courseToEdit = courses.find(c => c._id === selectedCourseId);
         if (courseToEdit) {
@@ -98,6 +103,7 @@ const AdminCourses = () => {
             );
         }
     }
+
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">

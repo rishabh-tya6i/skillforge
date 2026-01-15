@@ -6,7 +6,9 @@
 
 @layer base {
     body {
-        @apply bg-background text-gray-200 antialiased selection:bg-primary selection:text-white;
+        /* Ensure body is white to prevent black bleed-through on mobile browsers */
+        background-color: #ffffff !important;
+        @apply text-gray-200 antialiased selection:bg-primary selection:text-white;
     }
 }
 

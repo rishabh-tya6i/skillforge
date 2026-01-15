@@ -11,6 +11,12 @@ import Dashboard from './pages/Dashboard';
 import Cart from './pages/Cart';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Mentors from './pages/Mentors';
+import SuccessStories from './pages/SuccessStories';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import CookiePolicy from './pages/CookiePolicy';
+import RefundPolicy from './pages/RefundPolicy';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { UserProvider } from './context/UserContext';
@@ -53,6 +59,12 @@ function App() {
                         <Route path="/cart" element={<Cart />} />
                         <Route path="/about" element={<About />} />
                         <Route path="/contact" element={<Contact />} />
+                        <Route path="/mentors" element={<Mentors />} />
+                        <Route path="/stories" element={<SuccessStories />} />
+                        <Route path="/privacy" element={<PrivacyPolicy />} />
+                        <Route path="/terms" element={<TermsOfService />} />
+                        <Route path="/cookie-policy" element={<CookiePolicy />} />
+                        <Route path="/refund-policy" element={<RefundPolicy />} />
                       </Routes>
                     </Layout>
                   </Router>

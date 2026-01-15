@@ -24,6 +24,7 @@ const Navbar = () => {
     const { cart } = useCart();
     const [isScrolled, setIsScrolled] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -32,10 +33,31 @@ const Navbar = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth >= 1024) {
+                setIsMobileMenuOpen(false);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Prevent body scroll when menu is open
+    useEffect(() => {
+        if (isMobileMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+    }, [isMobileMenuOpen]);
+
     const coursesDropdown = [
-        { title: "Technology", items: ["Full Stack Dev", "Frontend (React)", "Backend (Node)", "Data Science", "AI & ML"] },
-        { title: "Career Tracks", items: ["Full Stack Lead", "Data Scientist", "AI Engineer", "Product Manager"] },
-        { title: "Internships", items: ["Web Development", "Data Analytics", "Software Engineering"] },
+        { title: "Catalog", items: ["All", "Technology Courses"] },
+        { title: "Specialization", items: ["Course Internship", "Value Added Skills"] },
+        { title: "Practice", items: ["Mock Test"] },
     ];
 
     return (
@@ -47,8 +69,8 @@ const Navbar = () => {
         >
             <div className={`
                 max-w-7xl mx-auto px-6 h-20 flex items-center justify-between
-                bg-white/90 backdrop-blur-xl border border-white/20 rounded-full shadow-lg
-                transition-all duration-500
+                !bg-white md:!bg-white lg:!bg-white backdrop-blur-xl border border-white/20 rounded-full shadow-lg
+                transition-all duration-500 relative z-50
             `}>
                 {/* Logo */}
                 <Link to="/" className="flex items-center group">
@@ -89,7 +111,10 @@ const Navbar = () => {
                                             <ul className="space-y-2">
                                                 {cat.items.map((item, i) => (
                                                     <li key={i}>
-                                                        <Link to="/courses" className="text-sm text-gray-600 hover:text-primary hover:translate-x-1 transition-all block">
+                                                        <Link
+                                                            to={`/courses?category=${encodeURIComponent(item)}`}
+                                                            className="text-sm text-gray-600 hover:text-primary hover:translate-x-1 transition-all block"
+                                                        >
                                                             {item}
                                                         </Link>
                                                     </li>
@@ -107,10 +132,28 @@ const Navbar = () => {
 
                     {/* Search */}
                     <div className="relative group">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors text-gray-500 group-focus-within:text-primary" />
+                        <button
+                            onClick={() => {
+                                if (searchQuery.trim()) {
+                                    navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
+                                    setSearchQuery('');
+                                }
+                            }}
+                            className="absolute left-3 top-1/2 -translate-y-1/2"
+                        >
+                            <Search className="w-4 h-4 transition-colors text-gray-500 group-focus-within:text-primary cursor-pointer hover:text-primary" />
+                        </button>
                         <input
                             type="text"
                             placeholder="Find a course..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && searchQuery.trim()) {
+                                    navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
+                                    setSearchQuery('');
+                                }
+                            }}
                             className="pl-10 pr-4 py-2 rounded-full border text-sm focus:outline-none transition-all w-48 focus:w-64 bg-gray-50 border-gray-200 text-gray-900 focus:border-primary focus:bg-white"
                         />
                     </div>
@@ -162,7 +205,147 @@ const Navbar = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Mobile Menu Toggle */}
+                <div className="lg:hidden flex items-center gap-4">
+                    <Link to="/cart" className="relative group">
+                        <div className="p-2 rounded-full transition-colors hover:bg-gray-100">
+                            <ShoppingCart className="w-6 h-6 transition-colors text-gray-600 group-hover:text-primary" />
+                        </div>
+                        {cart.length > 0 && (
+                            <span className="absolute top-0 right-0 bg-accent-purple text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg animate-pulse">
+                                {cart.length}
+                            </span>
+                        )}
+                    </Link>
+                    <button
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        className="p-2 text-gray-700 hover:text-primary transition-colors"
+                    >
+                        {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                    </button>
+                </div>
             </div>
+
+            {/* Mobile Menu Overlay */}
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="fixed inset-0 top-[0px] z-40 !bg-white md:!bg-white min-h-screen lg:hidden pt-24 overflow-y-auto"
+                    >
+                        <div className="px-6 py-8 space-y-8">
+                            {/* Mobile Search */}
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Search courses..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && searchQuery.trim()) {
+                                            navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
+                                            setSearchQuery('');
+                                            setIsMobileMenuOpen(false);
+                                        }
+                                    }}
+                                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:border-primary focus:bg-white text-gray-900 outline-none"
+                                />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                            </div>
+
+                            <div className="space-y-4">
+                                <Link
+                                    to="/"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="block text-lg font-medium text-gray-800 hover:text-primary"
+                                >
+                                    Home
+                                </Link>
+                                <div className="space-y-2">
+                                    <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Courses</p>
+                                    <Link
+                                        to="/courses"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="block text-lg font-medium text-gray-800 hover:text-primary pl-4 border-l-2 border-transparent hover:border-primary"
+                                    >
+                                        All Courses
+                                    </Link>
+                                    <Link
+                                        to="/courses?category=Technology%20Courses"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="block text-lg font-medium text-gray-800 hover:text-primary pl-4 border-l-2 border-transparent hover:border-primary"
+                                    >
+                                        Technology
+                                    </Link>
+                                    <Link
+                                        to="/courses?category=Course%20Internship"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="block text-lg font-medium text-gray-800 hover:text-primary pl-4 border-l-2 border-transparent hover:border-primary"
+                                    >
+                                        Internships
+                                    </Link>
+                                </div>
+                                <Link
+                                    to="/about"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="block text-lg font-medium text-gray-800 hover:text-primary"
+                                >
+                                    About
+                                </Link>
+                                <Link
+                                    to="/contact"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="block text-lg font-medium text-gray-800 hover:text-primary"
+                                >
+                                    Contact
+                                </Link>
+                            </div>
+
+                            <div className="pt-8 border-t border-gray-100">
+                                {isAuthenticated ? (
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <img src={user.avatar} alt="Profile" className="w-10 h-10 rounded-full" />
+                                            <div>
+                                                <p className="font-bold text-gray-900">{user.name}</p>
+                                                <p className="text-sm text-gray-500">{user.email}</p>
+                                            </div>
+                                        </div>
+                                        <Link
+                                            to="/dashboard"
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            className="block w-full text-center py-3 rounded-xl bg-gray-100 text-gray-800 font-medium hover:bg-gray-200"
+                                        >
+                                            Dashboard
+                                        </Link>
+                                        <button
+                                            onClick={() => {
+                                                logout();
+                                                setIsMobileMenuOpen(false);
+                                            }}
+                                            className="block w-full text-center py-3 rounded-xl bg-red-50 text-red-500 font-medium hover:bg-red-100"
+                                        >
+                                            Logout
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                                            <Button variant="ghost" className="w-full justify-center">Log In</Button>
+                                        </Link>
+                                        <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                                            <Button variant="primary" className="w-full justify-center shadow-none">Sign Up</Button>
+                                        </Link>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </nav>
     );
 };

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Mail, Phone, MapPin, MessageSquare, Send,
-    Linkedin, Instagram, Twitter, Youtube,
+    Linkedin, Facebook,
     Clock, Globe, CheckCircle, Zap
 } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
@@ -269,14 +269,14 @@ const Contact = () => {
                             <ContactInfoCard
                                 icon={Mail}
                                 title="Email Support"
-                                info="help@skillforge.com"
+                                info="Info@skillforge.com.au"
                                 sub="24/7 Response Time"
                                 delay={0.2}
                             />
                             <ContactInfoCard
                                 icon={Phone}
                                 title="Phone Support"
-                                info="+1 (555) 123-4567"
+                                info="+61280067926"
                                 sub="Mon-Fri, 9am - 6pm EST"
                                 delay={0.3}
                             />
@@ -316,7 +316,7 @@ const Contact = () => {
                                 </div>
                                 <div className="text-left">
                                     <p className="text-white font-bold text-sm">SkillForge HQ</p>
-                                    <p className="text-xs text-gray-400">123 Innovation Blvd, San Francisco</p>
+                                    <p className="text-xs text-gray-400">903/50 Clarence St, Sydney, NSW 2000, AU</p>
                                 </div>
                             </GlassCard>
                         </motion.div>
@@ -327,16 +327,14 @@ const Contact = () => {
                                 <Globe className="w-4 h-4 text-primary" /> Connect on Social
                             </h3>
                             <div className="flex gap-4">
-                                <SocialButton icon={Linkedin} href="#" color="blue-500" />
-                                <SocialButton icon={Twitter} href="#" color="cyan-400" />
-                                <SocialButton icon={Instagram} href="#" color="pink-500" />
-                                <SocialButton icon={Youtube} href="#" color="red-500" />
+                                <SocialButton icon={Facebook} href="https://www.facebook.com/SkillforgeAU/" color="blue-500" />
+                                <SocialButton icon={Linkedin} href="https://www.linkedin.com/company/skillforgeaustralia/" color="blue-700" />
                             </div>
                         </div>
                     </motion.div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

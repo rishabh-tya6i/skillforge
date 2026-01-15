@@ -24,26 +24,34 @@ const Footer = () => {
                             Empowering the next generation of tech leaders. Join our ecosystem of innovation and master the skills of tomorrow.
                         </p>
                         <div className="flex space-x-4">
-                            {[Linkedin, Twitter, Youtube, Facebook].map((Icon, i) => (
-                                <a key={i} href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-primary hover:text-white hover:shadow-neon transition-all duration-300">
-                                    <Icon className="w-5 h-5" />
-                                </a>
-                            ))}
+                            <a href="https://www.facebook.com/SkillforgeAU/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-primary hover:text-white hover:shadow-neon transition-all duration-300" aria-label="Facebook">
+                                <Facebook className="w-5 h-5" />
+                            </a>
+                            <a href="https://www.linkedin.com/company/skillforgeaustralia/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-primary hover:text-white hover:shadow-neon transition-all duration-300" aria-label="LinkedIn">
+                                <Linkedin className="w-5 h-5" />
+                            </a>
                         </div>
                     </div>
 
                     {[
-                        { title: "Learning", links: ["Web Development", "Data Science", "AI & ML", "Career Tracks"] },
-                        { title: "Company", links: ["About Us", "Our Mentors", "Success Stories", "Contact Us"] },
-                        { title: "Legal", links: ["Privacy Policy", "Terms of Service", "Cookie Policy", "Refund Policy"] }
+                        {
+                            title: "Learning", links: [
+                                { name: "Technology Courses", path: "/courses?category=Technology%20Courses" },
+                                { name: "Course Internship", path: "/courses?category=Course%20Internship" },
+                                { name: "Value Added Skills", path: "/courses?category=Value%20Added%20Skills" },
+                                { name: "Mock Test", path: "/courses?category=Mock%20Test" }
+                            ]
+                        },
+                        { title: "Company", links: [{ name: "About Us", path: "/about" }, { name: "Our Mentors", path: "/mentors" }, { name: "Success Stories", path: "/stories" }, { name: "Contact Us", path: "/contact" }] },
+                        { title: "Legal", links: [{ name: "Privacy Policy", path: "/privacy" }, { name: "Terms of Service", path: "/terms" }, { name: "Cookie Policy", path: "/cookie-policy" }, { name: "Refund Policy", path: "/refund-policy" }] }
                     ].map((col, idx) => (
                         <div key={idx}>
                             <h3 className="font-bold text-white mb-6 uppercase tracking-wider text-sm">{col.title}</h3>
                             <ul className="space-y-4">
                                 {col.links.map((link, i) => (
                                     <li key={i}>
-                                        <Link to="#" className="text-gray-400 hover:text-primary transition-colors text-sm hover:translate-x-1 inline-block">
-                                            {link}
+                                        <Link to={link.path || "#"} className="text-gray-400 hover:text-primary transition-colors text-sm hover:translate-x-1 inline-block">
+                                            {link.name || link}
                                         </Link>
                                     </li>
                                 ))}
