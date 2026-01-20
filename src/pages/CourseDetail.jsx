@@ -1,19 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { coursesData } from '../data/coursesData';
+import { COURSES_DATA } from '../data/courses';
 import { Button } from '../components/ui/Button';
 import { useCart } from '../context/CartContext';
 import { Clock, BarChart, Monitor, CheckCircle, Book, Calendar, ChevronLeft, Download } from 'lucide-react';
+import EnrollmentModal from '../components/ui/EnrollmentModal';
 
 const CourseDetails = () => {
     const { id } = useParams();
     const { addToCart } = useCart();
-    const course = coursesData.find(c => c.id === id) || coursesData.find(c => c.id.toString() === id);
+    const course = COURSES_DATA.find(c => c.id === id);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Scroll to top on mount
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [id]);
+
 
     if (!course) {
         return (
@@ -29,6 +28,12 @@ const CourseDetails = () => {
 
     return (
         <div className="min-h-screen bg-[#020617] text-white pt-20">
+            {/* Enrollment Modal */}
+            <EnrollmentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+            />
+
             {/* Hero Section */}
             <div className="relative bg-[#0F172A] border-b border-white/5 py-16 px-6 overflow-hidden">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px]" />
@@ -57,8 +62,20 @@ const CourseDetails = () => {
                         </div>
 
                         <div className="flex gap-4">
-                            <Button variant="primary" className="px-8 py-3 text-lg">Enroll Now</Button>
-                            <Button variant="ghost" className="px-6 border border-white/20">Download Syllabus</Button>
+                            <Button
+                                variant="primary"
+                                className="px-8 py-3 text-lg"
+                                onClick={() => setIsModalOpen(true)}
+                            >
+                                Enroll Now
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                className="px-6 border border-white/20"
+                                onClick={() => alert("Syllabus download started...")}
+                            >
+                                Download Syllabus
+                            </Button>
                         </div>
                     </div>
                     {/* Course Image */}
@@ -177,13 +194,20 @@ const CourseDetails = () => {
                         </ul>
 
                         <div className="mt-8 flex flex-col gap-3">
-                            <Button variant="primary" className="w-full justify-center py-4 text-lg">
+                            <Button
+                                variant="primary"
+                                className="w-full justify-center py-4 text-lg"
+                                onClick={() => setIsModalOpen(true)}
+                            >
                                 Enroll Now
                             </Button>
                             <Button
                                 variant="outline"
                                 className="w-full justify-center py-4 text-lg border-primary text-primary hover:bg-primary/10"
-                                onClick={() => addToCart(course)}
+                                onClick={() => {
+                                    addToCart(course);
+                                    alert("Added to cart!");
+                                }}
                             >
                                 Add to Cart
                             </Button>

@@ -3,7 +3,6 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { Quote, Briefcase, TrendingUp, Building } from 'lucide-react';
 
 const SuccessStories = () => {
-    useEffect(() => { window.scrollTo(0, 0); }, []);
 
     const stories = [
         {

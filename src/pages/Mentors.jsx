@@ -1,10 +1,8 @@
-import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { GlassCard } from '../components/ui/GlassCard';
-import { Linkedin, Twitter, Globe, Award, Briefcase, GraduationCap } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 const Mentors = () => {
-    useEffect(() => { window.scrollTo(0, 0); }, []);
 
     const mentors = [
         {
@@ -13,8 +11,7 @@ const Mentors = () => {
             company: "Former Google DeepMind",
             image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400",
             bio: "Dr. Mitchell has over 15 years of experience in Artificial Intelligence. She specializes in deep learning and has published numerous papers in top-tier conferences.",
-            expertise: ["Machine Learning", "Neural Networks", "Python"],
-            social: { linkedin: "#", twitter: "#" }
+            expertise: ["Artificial Intelligence & Machine Learning", "AI & Machine Learning Internship"]
         },
         {
             name: "James Rodriguez",
@@ -22,8 +19,7 @@ const Mentors = () => {
             company: "Netflix",
             image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=400",
             bio: "James is a cloud infrastructure expert who has helped scale systems for millions of users. He is passionate about automation and infrastructure as code.",
-            expertise: ["AWS", "Kubernetes", "Terraform"],
-            social: { linkedin: "#", twitter: "#" }
+            expertise: ["DevOps", "DevOps Internship"]
         },
         {
             name: "Emily Chen",
@@ -31,8 +27,7 @@ const Mentors = () => {
             company: "Spotify",
             image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=400",
             bio: "Emily leads data initiatives that power personalized recommendations. She loves teaching actionable data skills to aspiring analysts.",
-            expertise: ["Data Analysis", "Python", "SQL"],
-            social: { linkedin: "#", twitter: "#" }
+            expertise: ["Data Analytics", "Power BI", "Data Analytics Internship"]
         },
         {
             name: "Michael Chang",
@@ -40,8 +35,7 @@ const Mentors = () => {
             company: "IBM Security",
             image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400",
             bio: "With a background in ethical hacking, Michael helps Fortune 500 companies secure their networks. He brings real-world war stories to his teaching.",
-            expertise: ["Ethical Hacking", "Network Security", "Cryptography"],
-            social: { linkedin: "#", twitter: "#" }
+            expertise: ["Cybersecurity", "Cybersecurity Internship"]
         }
     ];
 
@@ -87,14 +81,6 @@ const Mentors = () => {
                             ))}
                         </div>
 
-                        <div className="mt-auto flex space-x-3">
-                            <a href={mentor.social.linkedin} className="p-2 rounded-full bg-white/5 hover:bg-[#0077b5] hover:text-white transition-colors text-gray-400">
-                                <Linkedin className="w-4 h-4" />
-                            </a>
-                            <a href={mentor.social.twitter} className="p-2 rounded-full bg-white/5 hover:bg-[#1DA1F2] hover:text-white transition-colors text-gray-400">
-                                <Twitter className="w-4 h-4" />
-                            </a>
-                        </div>
                     </GlassCard>
                 ))}
             </div>
@@ -107,7 +93,9 @@ const Mentors = () => {
                     <p className="text-gray-400 mb-8 max-w-lg mx-auto relative z-10">
                         Are you an expert in your field? Join our network of mentors and help shape the next generation of tech talent.
                     </p>
-                    <Button variant="primary" className="relative z-10">Apply as Mentor</Button>
+                    <Link to="/contact">
+                        <Button variant="primary" className="relative z-10">Apply as Mentor</Button>
+                    </Link>
                 </div>
             </div>
         </div>

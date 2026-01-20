@@ -2,6 +2,7 @@
 import { GlassCard } from '../components/ui/GlassCard';
 import { Target, Lightbulb, Heart, Globe, Users, Trophy, Zap, ArrowRight, Quote } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { Link } from 'react-router-dom';
 
 const About = () => {
     return (
@@ -91,9 +92,11 @@ const About = () => {
                 {/* CTA */}
                 <div className="text-center pb-12">
                     <h2 className="text-3xl font-bold text-white mb-6">Ready to start your journey?</h2>
-                    <Button variant="primary" className="px-10 py-4 text-lg shadow-neon group">
-                        Join SkillForge Today <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </Button>
+                    <Link to="/signup">
+                        <Button variant="primary" className="px-10 py-4 text-lg shadow-neon group">
+                            Join SkillForge Today <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                    </Link>
                 </div>
             </div>
         </div>

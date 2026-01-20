@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 
 const TermsOfService = () => {
-    useEffect(() => { window.scrollTo(0, 0); }, []);
 
     return (
         <div className="bg-[#020617] min-h-screen text-gray-300 pt-24 pb-20 px-6">
