@@ -6,6 +6,7 @@ import {
     Linkedin, Facebook,
     Clock, Globe, CheckCircle, Zap
 } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 import { GlassCard } from '../components/ui/GlassCard';
 import { Button } from '../components/ui/Button';
 
@@ -102,10 +103,40 @@ const Contact = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        setIsSubmitting(false);
-        setSubmitted(true);
+
+        // TODO: Replace these with your actual EmailJS credentials
+        // - Create an account at https://www.emailjs.com/
+        // - Connect your "skillforge.india91@gmail.com" account as an Email Service
+        // - Create an Email Template that sends to "ichchatyagi@gmail.com"
+        // - Get your Service ID, Template ID, and Public Key from the dashboard
+        const YOUR_SERVICE_ID = 'service_9kjiek4';
+        const YOUR_TEMPLATE_ID = 'template_y1opkh8';
+        const YOUR_PUBLIC_KEY = 'ErhTJ1ZKhHyNbt6ur';
+
+        const templateParams = {
+            to_name: 'Admin',
+            from_name: formData.name,
+            from_email: formData.email,
+            phone: formData.phone,
+            subject: formData.subject,
+            message: formData.message,
+            reply_to: formData.email,
+        };
+
+        try {
+            await emailjs.send(
+                YOUR_SERVICE_ID,
+                YOUR_TEMPLATE_ID,
+                templateParams,
+                YOUR_PUBLIC_KEY
+            );
+            setSubmitted(true);
+        } catch (error) {
+            console.error('FAILED...', error);
+            alert("Failed to send message. Please try again or check console for details.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
