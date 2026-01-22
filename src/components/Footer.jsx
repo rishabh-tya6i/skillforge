@@ -65,7 +65,7 @@ const Footer = () => {
                         Copyright © {new Date().getFullYear()} SkillForge. All rights reserved.
                     </p>
                     <p className="flex items-center">
-                        Developed by <span className="text-primary ml-1 font-bold">Nexstar</span>
+                        Developed by <a href="https://nexstarmedia.in/" target="_blank" rel="noopener noreferrer" className="text-primary ml-1 font-bold hover:underline">Nexstar</a>
                     </p>
                 </div>
             </div>
